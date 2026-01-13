@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizador de Reportes - Gestión de Reservas</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>📊 Visualizador de Reportes</h1>
+            <p class="subtitle">Carga y visualiza tus reportes CSV de forma ordenada y entendible</p>
+        </header>
+
+        <div class="upload-section">
+            <div class="upload-box" id="uploadBox">
+                <input type="file" id="csvFile" accept=".csv" hidden>
+                <div class="upload-content">
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <h3>Arrastra tu archivo CSV aquí</h3>
+                    <p>o haz clic para seleccionar</p>
+                    <button class="btn btn-primary" onclick="document.getElementById('csvFile').click()">
+                        Seleccionar Archivo
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="contentSection" class="content-section hidden">
+            <!-- Estadísticas -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-content">
+                        <h3 id="totalReservas">0</h3>
+                        <p>Total Reservas</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3 id="reservasPagadas">0</h3>
+                        <p>Reservas Pagadas</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <h3 id="totalIngresos">₲ 0</h3>
+                        <p>Total Ingresos</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-content">
+                        <h3 id="totalPendientes">₲ 0</h3>
+                        <p>Total Pendientes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros y Búsqueda -->
+            <div class="filters-section">
+                <div class="search-box">
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="m21 21-4.35-4.35"></path>
+                    </svg>
+                    <input type="text" id="searchInput" placeholder="Buscar por cliente, departamento, edificio...">
+                </div>
+                <div class="filters-row">
+                    <select id="filterPagado" class="filter-select">
+                        <option value="">Todos los estados de pago</option>
+                        <option value="Sí">Pagado</option>
+                        <option value="No">Pendiente</option>
+                    </select>
+                    <select id="filterEdificio" class="filter-select">
+                        <option value="">Todos los edificios</option>
+                    </select>
+                    <select id="filterEstado" class="filter-select">
+                        <option value="">Todos los estados</option>
+                        <option value="confirmada">Confirmada</option>
+                        <option value="en_curso">En Curso</option>
+                        <option value="completada">Completada</option>
+                    </select>
+                    <button class="btn btn-secondary" id="resetFilters">Limpiar Filtros</button>
+                    <button class="btn btn-success" id="exportBtn">Exportar Filtrado</button>
+                </div>
+            </div>
+
+            <!-- Tabla de Datos -->
+            <div class="table-container">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="id">ID <span class="sort-icon">↕</span></th>
+                            <th data-sort="cliente">Cliente <span class="sort-icon">↕</span></th>
+                            <th data-sort="cedula">Cédula <span class="sort-icon">↕</span></th>
+                            <th data-sort="telefono">Teléfono <span class="sort-icon">↕</span></th>
+                            <th data-sort="departamento">Depto <span class="sort-icon">↕</span></th>
+                            <th data-sort="edificio">Edificio <span class="sort-icon">↕</span></th>
+                            <th data-sort="check_in">Check-in <span class="sort-icon">↕</span></th>
+                            <th data-sort="check_out">Check-out <span class="sort-icon">↕</span></th>
+                            <th data-sort="dias">Días <span class="sort-icon">↕</span></th>
+                            <th data-sort="monto">Monto <span class="sort-icon">↕</span></th>
+                            <th data-sort="pagado">Pagado <span class="sort-icon">↕</span></th>
+                            <th data-sort="metodo_pago">Método <span class="sort-icon">↕</span></th>
+                            <th data-sort="fecha_pago">Fecha Pago <span class="sort-icon">↕</span></th>
+                            <th data-sort="estado">Estado <span class="sort-icon">↕</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination" id="pagination">
+            </div>
+
+            <!-- Información del archivo -->
+            <div class="file-info">
+                <p id="fileInfo"></p>
+                <button class="btn btn-secondary" id="loadNewFile">Cargar Nuevo Archivo</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/csvParser.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archivos temporales
+*.tmp
+*.log
+*.cache
+
+# Archivos de ejemplo CSV (opcional, descomenta si no quieres subirlos)
+# *.csv
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
