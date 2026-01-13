@@ -112,6 +112,12 @@ function loadCSVFile(file) {
             allData = result.data;
             filteredData = [...allData];
             
+            // Debug: verificar que los datos se parsearon correctamente
+            if (allData.length > 0) {
+                console.log('Primera fila parseada:', allData[0]);
+                console.log('Headers encontrados:', result.headers);
+            }
+            
             // Actualizar estadísticas
             updateStats(result.resumen || parser.calculateStats());
             
@@ -133,7 +139,8 @@ function loadCSVFile(file) {
             
         } catch (error) {
             alert(`Error al procesar el archivo: ${error.message}`);
-            console.error(error);
+            console.error('Error completo:', error);
+            console.error('Stack:', error.stack);
         }
     };
     
@@ -326,8 +333,8 @@ function renderTable() {
             <td>${row.dias || 'N/A'}</td>
             <td>${row.monto ? formatCurrency(row.monto) : 'N/A'}</td>
             <td>${getPagadoBadge(row.pagado)}</td>
-            <td>${row.metodo_pago || 'N/A'}</td>
-            <td>${row.fecha_pago || 'N/A'}</td>
+            <td>${formatMetodoPago(row.metodo_pago)}</td>
+            <td>${formatFechaPago(row.fecha_pago, row.pagado)}</td>
             <td>${getEstadoBadge(row.estado)}</td>
         `;
         
@@ -366,6 +373,30 @@ function getEstadoBadge(estado) {
     }
     
     return `<span class="badge badge-warning">${estado}</span>`;
+}
+
+/**
+ * Formatea el método de pago
+ */
+function formatMetodoPago(metodoPago) {
+    if (!metodoPago || metodoPago === 'N/A' || metodoPago === null) {
+        return '<span style="color: var(--text-light); font-style: italic;">No especificado</span>';
+    }
+    return metodoPago;
+}
+
+/**
+ * Formatea la fecha de pago
+ */
+function formatFechaPago(fechaPago, pagado) {
+    if (!fechaPago || fechaPago === 'N/A' || fechaPago === null) {
+        // Si está pagado pero no tiene fecha, mostrar mensaje
+        if (pagado === 'Sí' || pagado === true) {
+            return '<span style="color: var(--warning); font-style: italic;">Sin fecha registrada</span>';
+        }
+        return '<span style="color: var(--text-light); font-style: italic;">Pendiente</span>';
+    }
+    return fechaPago;
 }
 
 /**
