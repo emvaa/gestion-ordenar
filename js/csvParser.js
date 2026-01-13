@@ -41,8 +41,14 @@ class CSVParser {
         // Parsear encabezados
         this.headers = this.parseCSVLine(lines[headerIndex]);
         
-        // Normalizar nombres de columnas
-        this.headers = this.headers.map(h => this.normalizeHeader(h));
+        // Limpiar y normalizar nombres de columnas
+        this.headers = this.headers.map(h => {
+            const cleaned = h.trim().replace(/^"|"$/g, '');
+            return this.normalizeHeader(cleaned);
+        });
+        
+        // Debug: mostrar headers parseados (comentar en producción)
+        // console.log('Headers parseados:', this.headers);
 
         // Parsear datos
         this.data = [];
@@ -57,10 +63,12 @@ class CSVParser {
             }
 
             const row = this.parseCSVLine(line);
-            if (row.length === this.headers.length) {
+            // Aceptar filas aunque tengan menos columnas (llenar con null)
+            if (row.length > 0) {
                 const dataRow = {};
                 this.headers.forEach((header, index) => {
-                    dataRow[header] = this.cleanValue(row[index]);
+                    const value = row[index] !== undefined ? row[index] : '';
+                    dataRow[header] = this.cleanValue(value);
                 });
                 this.data.push(dataRow);
             }
@@ -117,6 +125,9 @@ class CSVParser {
      * @returns {string} - Nombre normalizado
      */
     normalizeHeader(header) {
+        // Normalizar: quitar espacios extra y convertir a formato estándar
+        const normalized = header.trim();
+        
         const mapping = {
             'ID Reserva': 'id',
             'ID': 'id',
@@ -131,13 +142,32 @@ class CSVParser {
             'Monto': 'monto',
             'Pagado': 'pagado',
             'Método de Pago': 'metodo_pago',
+            'Método de pago': 'metodo_pago',
             'Método': 'metodo_pago',
             'Fecha de Pago': 'fecha_pago',
+            'Fecha de pago': 'fecha_pago',
             'Fecha Pago': 'fecha_pago',
             'Estado': 'estado'
         };
 
-        return mapping[header] || header.toLowerCase().replace(/\s+/g, '_');
+        // Buscar coincidencia exacta primero
+        if (mapping[normalized]) {
+            return mapping[normalized];
+        }
+
+        // Buscar coincidencia case-insensitive
+        const lowerHeader = normalized.toLowerCase();
+        for (const [key, value] of Object.entries(mapping)) {
+            if (key.toLowerCase() === lowerHeader) {
+                return value;
+            }
+        }
+
+        // Si no hay coincidencia, normalizar manualmente
+        return normalized.toLowerCase().replace(/\s+/g, '_').replace(/[áéíóú]/g, (m) => {
+            const map = { 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u' };
+            return map[m] || m;
+        });
     }
 
     /**
@@ -146,12 +176,18 @@ class CSVParser {
      * @returns {any} - Valor limpio
      */
     cleanValue(value) {
-        if (!value || value === 'N/A' || value === '') {
+        if (!value || value === '') {
             return null;
         }
 
         // Remover comillas si existen
-        value = value.replace(/^"|"$/g, '');
+        value = value.replace(/^"|"$/g, '').trim();
+
+        // Si es "N/A", mantenerlo como string vacío (no null) para campos opcionales
+        // pero convertir a null para campos numéricos
+        if (value === 'N/A' || value === '') {
+            return null;
+        }
 
         // Intentar convertir números
         if (/^\d+$/.test(value)) {
